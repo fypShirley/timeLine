@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>时间插件</title>
+
+    <link rel="stylesheet" href="./css/simplify.css"/>
+  <link rel="stylesheet" href="./css/bootstrap.css"/>
+  <link rel="stylesheet" href="./css/bugEyes.css"/>
+  <link rel="stylesheet" href="./css/font-awesome.min.css"/>
+  <link rel="stylesheet" href="./css/font.css"/>
+  <link rel="stylesheet" href="./css/bootstrap-datetimepicker.min.css"/>
+  <style>
+   .smart-widget .smart-widget-inner .smart-widget-hidden-section{
+       display: block;
+       background: #fff;
+   }
+
+    .date{margin: 0 auto;width: 1500px;min-height:600px;position: relative;}
+    .box{position: absolute;top:46%;/*height:20px;*/width: 100%;}
+    .baseLine{  border-bottom: 2px solid #908d8d;position: absolute;bottom:0;left: 0;right: 0;}
+
+    .timelineS,.timelineE,.timelineT{
+        height:2px;  width:2px;position: absolute;bottom:0;
+    }
+   .timelineE{right: 0;}
+   .timelineS{left:0;}
+
+   .timelineE>.pointCircle,
+   .timelineS>.pointCircle{
+       background:red;width: 8px;height: 8px;border-radius: 50%;opacity: 0.7;
+       position: absolute;bottom:-3px;left:-3px;
+   }
+   .timelineT>.pointCircle{
+       width: 0;height: 0;opacity: 0.7;
+       border-top:10px solid transparent;
+       border-left:10px solid transparent;
+       border-right:10px solid transparent;
+       border-bottom:10px solid red;
+       position: absolute;bottom:-9px;left:-3px;
+   }
+   .timelineE>.timePoint,
+   .timelineS>.timePoint,
+   .timelineT>.timePoint{
+       position: absolute;
+       top:10px;
+       left:-25px;width: 62px;
+   }
+
+    #nodes{position:relative;width: 100%;height: 20px;}
+    .dateNode{
+      font-size: 12px;height:2px;
+      width:2px;position: absolute;bottom:0;left:0;
+    }
+
+    .dateNode .circle{
+      z-index:10;
+      background:#333;width: 6px;height: 6px;border-radius: 50%;
+      position: absolute;bottom:-2px;left:-2px;
+    }
+    .dateNode .line{
+      height:45px;width:2px;background:#ddd;
+      position: absolute;bottom:0;left:0;
+    }
+
+    .dateNode .title{cursor: pointer;
+      max-width:300px;
+      overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      position: absolute;bottom:45px;left: -20px;height:20px;background: #fff;z-index: 20;
+    }
+
+/*面板*/
+    .plate div{margin-bottom: 10px;}
+    .plate{
+        padding: 10px;
+        width: 180px;z-index: 30;display: none;
+        position: absolute;background:#fff;border:1px solid #ddd;
+    }
+    .plate.showPlate{display: block;}
+    li{list-style: none;}
+
+/*筛选器*/
+    .form-control{width: 120px;display: inline-block;margin-bottom: 10px;}
+    .interval{margin-right: 10px;}
+/*说明板*/
+     .Explanation{
+         border:1px solid #ddd;
+         position: absolute;right:24px;top:6px;
+         padding:8px 15px;}
+     .expContent li{height: 20px;line-height:20px;}
+     .expContent .inline-block{width: 8px;height: 8px;border-radius: 50%;}
+     .expContent .green{background: #396}
+     .expContent .red{background: #B81D27}
+     .expContent .yellow{background: #FFC755;margin-left: 10px;}
+     .expContent .blue{background: #3278B3;margin-left: 10px;}
+  </style>
+</head>
+<body ><!--style="font-size: 0;"-->
+<div class="wrapper">
+
+  <div class="main-container">
+
+      <div class="smart-widget">
+          <div class="smart-widget-header">
+              时间轴
+          </div>
+
+          <div class="smart-widget-inner"  style="position: relative;">
+              <div class="Explanation">
+                  <ul class="expContent">
+                      <li>
+                          <div class="green inline-block"></div>
+                          <span>已执行的项目事件</span>
+                          <div class="yellow inline-block"></div>
+                          <span>已取消的计划</span>
+                      </li>
+                      <li>
+                          <div class="red inline-block"></div>
+                          <span>未执行的项目事件</span>
+                          <div class="blue inline-block"></div>
+                          <span>未取消的计划</span>
+                      </li>
+
+                  </ul>
+              </div>
+              <div class="smart-widget-body">
+                  <div class="inline-block">
+                      <div class="inline-block interval" style="position: relative;">
+                          <input onclick="start()" style="display: inline-block;width: 200px" class="form-control" id="startTime" type="text" placeholder="请选择开始时间">
+                          <i class="fa fa-calendar" style="position: absolute;right: 10px;top: 10px"></i>
+                      </div>
+                      <div class="inline-block interval" style="position: relative;">
+                          <input onclick="end()" style="display: inline-block;width: 200px" class="form-control" id="endTime" type="text" placeholder="请选择结束时间">
+                          <i class="fa fa-calendar" style="position: absolute;right: 10px;top: 10px"></i>
+                      </div>
+
+                      <button type="button" id="select" class="btn interval btn-primary" style="width: 82px">
+                          选择时间 </button>
+                  </div>
+
+
+                  <div class="inline-block interval">
+                      <span> 计划类型：</span>
+                      <select class="form-control" id="selectType">
+                          <option value="0">全部</option>
+                          <option value="1">仅计划</option>
+                          <option value="10">&nbsp;&nbsp;&nbsp;专家检测</option>
+                          <option value="11">&nbsp;&nbsp;&nbsp;被动扫描</option>
+                          <option value="2">仅事件</option>
+                          <option value="20">&nbsp;&nbsp;&nbsp;项目启动</option>
+                          <option value="21">&nbsp;&nbsp;&nbsp;项目启动会</option>
+                          <option value="22">&nbsp;&nbsp;&nbsp;项目服务</option>
+                          <option value="23">&nbsp;&nbsp;&nbsp;项目回访</option>
+                          <option value="24">&nbsp;&nbsp;&nbsp;项目验收</option>
+                      </select>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+    <div class="smart-widget">
+
+      <div class="smart-widget-header"style="overflow: hidden;">
+          时间轴
+          <div class="pull-right">
+              <button type="button" id="bkToday" class="btn interval btn-primary" style="width: 82px">
+                  查看今天 </button>
+          </div>
+      </div>
+
+      <div class="smart-widget-inner" style="overflow: auto;" id="swInner">
+          <div class="smart-widget-body" style="min-width: 1600px;" id="swBody">
+            <div class="date" id="timeline">
+              <div class="box">
+                <div class="baseLine"></div>
+
+                <div class="timelineS">
+                    <span class="timePoint"></span>
+                    <div class="pointCircle"></div>
+                </div>
+                <div class="timelineE">
+                    <span class="timePoint"></span>
+                    <div class="pointCircle"></div>
+                </div>
+                <div class="timelineT">
+                    <span class="timePoint"></span>
+                    <div class="pointCircle"></div>
+                </div>
+
+                <div id="nodes">
+
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="./js/jquery-1.11.1.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<script src="./js/bframe.js"></script>
+<script src="./js/date-vendor.js"></script>
+<script src="./js/bootstrap-datetimepicker.zh-CN.js"></script>
+
+
+<script>
+
+  //开始时间设置
+  function start(){
+      if($("#endTime").val()){
+          $('#startTime').datetimepicker('setEndDate', new Date(new Date($("#endTime").val()).getTime()));
+      }
+  }
+  //结束时间设置
+  function end(){
+      if($("#startTime").val()){
+          $('#endTime').datetimepicker('setStartDate', new Date(new Date($("#startTime").val()).getTime()));
+      }else{
+          $('#endTime').datetimepicker('setEndDate', new Date(new Date().getTime()));
+      }
+  }
+
+  $('#startTime').datetimepicker({
+      format: 'yyyy-mm-dd',
+      language:  'zh-CN',
+      autoclose: true,
+      todayHighlight: 1,
+      minView: 2,
+      forceParse: 0,
+      pickerPosition: "bottom-right",
+  });
+  $('#endTime').datetimepicker({
+      format: 'yyyy-mm-dd',
+      language:  'zh-CN',
+      autoclose: true,
+      todayHighlight: 1,
+      minView: 2,
+      forceParse: 0,
+      pickerPosition: "bottom-right",
+  });
+
+  var DATA= {
+      "event":[
+          {"time":"2017-12-05T01:45:00.000Z",
+              "type":2,"title":"事件1",
+              "status":0,"company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"5a267fd449e00b688918bc60"},
+          {"time":"2017-12-08T08:55:00.000Z",
+              "type":3,"title":"新事件","status":1,
+              "company":{"id":"59e7016820b5c60dd8c8ae19","name":"new"},
+              "id":"5a28f7acae093a596b5738a2"}],
+      "scheduleStart":[
+          {"time":"2017-07-02T16:00:00.000Z","type":0,"title":2,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481125"},
+          {"time":"2017-07-02T16:00:00.000Z","type":1,"title":4,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad9257648113a"},
+          {"time":"2017-07-03T16:00:00.000Z","type":1,"title":1,"status":1,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf095"},
+          {"time":"2017-07-11T16:00:00.000Z","type":0,"title":1,"status":1,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf089"},
+          {"time":"2017-08-01T16:00:00.000Z","type":1,"title":5,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481139"},
+          {"time":"2017-08-06T16:00:00.000Z","type":0,"title":3,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481124"},
+          {"time":"2017-08-11T16:00:00.000Z","type":1,"title":2,"status":1,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf094"},
+          {"time":"2017-08-15T16:00:00.000Z","type":1,"title":6,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481138"},
+          {"time":"2017-08-29T16:00:00.000Z","type":1,"title":7,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481137"},
+          {"time":"2017-09-06T16:00:00.000Z","type":0,"title":4,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481123"},
+          {"time":"2017-09-11T16:00:00.000Z","type":1,"title":3,"status":1,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf093"},
+          {"time":"2017-09-12T16:00:00.000Z","type":1,"title":8,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481136"},
+          {"time":"2017-09-26T16:00:00.000Z","type":1,"title":9,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481135"},
+          {"time":"2017-10-06T16:00:00.000Z","type":0,"title":5,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481122"},
+          {"time":"2017-10-10T16:00:00.000Z","type":1,"title":10,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481134"},
+          {"time":"2017-10-11T16:00:00.000Z","type":0,"title":2,"status":1,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf088"},
+          {"time":"2017-10-11T16:00:00.000Z","type":1,"title":4,"status":1,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf092"},
+          {"time":"2017-10-24T16:00:00.000Z","type":0,"title":1,"status":1,
+              "company":{"id":"59e7016820b5c60dd8c8ae19","name":"new"},
+              "id":"59e7031b20b5c60dd8c8ae30"},
+          {"time":"2017-10-24T16:00:00.000Z","type":1,"title":11,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481133"},
+          {"time":"2017-10-24T16:00:00.000Z","type":1,"title":1,"status":1,
+              "company":{"id":"59e7016820b5c60dd8c8ae19","name":"new"},
+              "id":"59e7031b20b5c60dd8c8ae3c"},
+          {"time":"2017-11-06T16:00:00.000Z","type":0,"title":6,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481121"},
+          {"time":"2017-11-07T16:00:00.000Z","type":1,"title":12,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481132"},
+          {"time":"2017-11-11T16:00:00.000Z","type":1,"title":5,"status":1,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf091"},
+          {"time":"2017-11-21T16:00:00.000Z","type":1,"title":13,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481131"},
+          {"time":"2017-11-24T16:00:00.000Z","type":1,"title":2,"status":1,
+              "company":{"id":"59e7016820b5c60dd8c8ae19","name":"new"},
+              "id":"59e7031b20b5c60dd8c8ae3b"},
+          {"time":"2017-12-05T16:00:00.000Z",
+              "type":1,"title":14,"status":1,"company":
+              {"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481130"},
+          {"time":"2017-12-06T16:00:00.000Z","type":0,"title":7,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad92576481120"},
+          {"time":"2017-12-11T16:00:00.000Z",
+              "type":1,"title":6,"status":1,"company":{"id":"595cd3d4080ad9257648113b",
+                  "name":"测试企业2"},"id":"595dd6b7787b766d9d7cf090"},
+          {"time":"2017-12-19T16:00:00.000Z","type":1,"title":15,"status":1,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad9257648112f"},
+          {"time":"2017-12-24T16:00:00.000Z",
+              "type":1,"title":3,"status":1,"company":{"id":"59e7016820b5c60dd8c8ae19",
+                  "name":"new"},"id":"59e7031b20b5c60dd8c8ae3a"},
+          {"time":"2018-01-02T16:00:00.000Z","type":1,"title":16,"status":0,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad9257648112e"},
+          {"time":"2018-01-06T16:00:00.000Z","type":0,"title":8,"status":0,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad9257648111f"},
+          {"time":"2018-01-11T16:00:00.000Z",
+              "type":0,"title":3,"status":0,"company":{"id":"595cd3d4080ad9257648113b",
+              "name":"测试企业2"},"id":"595dd6b7787b766d9d7cf087"},
+          {"time":"2018-01-11T16:00:00.000Z","type":1,"title":7,"status":0,
+              "company":{"id":"595cd3d4080ad9257648113b","name":"测试企业2"},
+              "id":"595dd6b7787b766d9d7cf08f"},
+          {"time":"2018-01-16T16:00:00.000Z","type":1,"title":17,"status":0,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad9257648112d"},
+          {"time":"2018-01-24T16:00:00.000Z",
+              "type":0,"title":2,"status":0,"company":{"id":"59e7016820b5c60dd8c8ae19",
+              "name":"new"},"id":"59e7031b20b5c60dd8c8ae2f"},
+          {"time":"2018-01-24T16:00:00.000Z","type":1,"title":4,"status":0,
+              "company":{"id":"59e7016820b5c60dd8c8ae19","name":"new"},
+              "id":"59e7031b20b5c60dd8c8ae39"},
+          {"time":"2018-01-30T16:00:00.000Z","type":1,"title":18,"status":0,
+              "company":{"id":"5924eb50ffb3db6072f2c7d4","name":"上海测试3公司"},
+              "id":"595cd0ea080ad9257648112c"},
+          {"time":"2018-02-06T16:00:00.000Z",
+              "type":0,"title":9,"status":0,"company":{"id":"5924eb50ffb3db6072f2c7d4",
+                  "name":"上海测试3公司"},"id":"595cd0ea080ad9257648111e"}
+      ],
+          "scheduleEnd":[]}
+
+
+  var timline = {
+    Data:{action : 'timeline'},
+    timeStep:null,//时间段的开始、结束、时间间距 时间戳格式
+    timeArr:null,//保存api请求的数据
+    companyTd : '',
+    intervalWidth : 50,
+    init : function(time1,time2){
+        $('#startTime').val(format.date(time1).date);
+        $('#endTime').val(format.date(time2).date);
+
+        var self = this;
+        self.companyId = queryString('id');
+        self.Data['startTime'] = time1.toISOString();
+        self.Data['endTime'] = time2.toISOString();
+
+        if(self.companyId){
+            self.Data['company_id'] = self.companyId;
+        }
+
+        var end= time2;
+        end.setTime(end.getTime() + 24 * 3600 * 1000);
+        end = new Date(end.getFullYear() + "/" + (end.getMonth() + 1) + '/' + end.getDate());
+
+        self.timeStep = {
+            start : time1.getTime() ,
+            end : end.getTime() ,
+            total : end.getTime() - time1.getTime()
+        };
+
+        /*$.ajax({
+            url:'/api/events',
+            data:self.Data,
+            success:function(data){
+                self.timeArr = data;
+                self.select();
+            }
+        })*/
+        self.timeArr = DATA;
+        self.select();
+    },
+
+      /********  整理数据  *********/
+    select : function(obj){
+        var TimeArr = this.timeArr;
+
+        var event = TimeArr.event,
+            Sstart = TimeArr.scheduleStart,
+            Send = TimeArr.scheduleEnd,
+            Last = [];
+        var eventArr = [];
+        var startArr = [];
+        var endArr = [];
+
+    /** 筛选类型数据 **/
+        var selObj = obj || $('#selectType').val();
+        var type = selObj.slice(0,1);//1,2 计划，事件
+        var value = selObj.slice(1);
+
+        if(type == 2){//事件
+
+            if(value){//有值，筛选，
+                for(var a=0;a<event.length;a++){
+                    if(value == event[a].type){
+                        eventArr.push(event[a]);
+                    }
+                }
+            }else{//全部事件
+                eventArr = event;
+            }
+
+        }else{//计划
+            if(value){//有值，筛选，
+                for(var b=0;b<Sstart.length;b++){
+                    if(value == Sstart[b].type){
+                        startArr.push(Sstart[b]);
+                    }
+                }
+
+                for(var c=0;c<Send.length;c++){
+                    if(value == Send[c].type){
+                        endArr.push(Send[c]);
+                    }
+                }
+            }else{//全部计划
+                startArr = Sstart;
+                endArr = Send;
+            }
+        }
+
+
+
+        /*增加结束时间*/
+        var starts = [];
+        for(var j=0;j<startArr.length;j++){
+            starts.push(startArr[j]);
+            startArr[j].isEnd = false; //默认都没有结束时间
+
+            if(startArr[j].status != 2){//status == 2 状态为已取消 不计算结束时间
+                var timeObj = {};
+                var time = new Date(startArr[j].time);
+                if(startArr[j].type == 1){//type == 1 预计7天
+                    time.setTime(time.getTime() + 7 * 24 * 3600 * 1000);
+                }else{                  //type == 0 预计14天
+                    time.setTime(time.getTime() + 14 * 24 * 3600 * 1000);
+                }
+
+                time = new Date(time.getFullYear() + "/" + (time.getMonth() + 1) + '/' + time.getDate());
+                if(time < new Date(this.timeStep.end)){         //加7天在范围内
+                    timeObj.time = time.toISOString();
+                    timeObj.status = startArr[j].status;
+                    timeObj.type = startArr[j].type;
+                    timeObj.title = startArr[j].title;
+                    timeObj.company = startArr[j].company;
+                    timeObj.id = startArr[j].id;
+                    timeObj.isEnd = true;
+                    startArr[j].isEnd = false;  //结束时间在时间轴范围内
+                    starts.push(timeObj);
+                }
+            }
+
+        }
+
+        /*事件*/
+        for(var i=0;i<eventArr.length;i++){
+            eventArr[i]['arrType'] = 0;
+            Last.push(eventArr[i]);
+        }
+        /*计划开始*/
+        for(var t=0;t<starts.length;t++){
+            starts[t]['arrType'] = 2;
+            Last.push(starts[t]);
+        }
+        /*计划结束*/
+        for(var s=0;s<endArr.length;s++){
+            endArr[s]['arrType'] = 1;
+            Last.push(endArr[s]);
+        }
+
+        Last.sort(function (a,b) {
+            if (a.time > b.time) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+
+//        return {timeData:timeData,list:Last};
+
+        this.lineData(Last);
+    },
+
+      /********  拼装时间轴  *********/
+    lineData : function(arr){
+        $('#nodes').empty();
+        /*arrType  0:基础事件， 1:结束时间， 2:开始时间*/
+
+        var ScheType = {0:'专家检测', 1:'被动扫描'};
+
+        var  timeStep = this.timeStep;
+
+        /*时间轴长度*/
+        var timelineDiv = $('#timeline');
+
+        var baseWidth = Math.ceil(timeStep.total/(24 * 3600 * 1000))*this.intervalWidth;
+        timelineDiv.width(baseWidth);
+
+        $('#swBody').css({'min-width':baseWidth+100});
+
+        /*开始、结束、今天时间点*/
+        var today = new Date();
+        var todayZero = new Date(today.getFullYear() + "/" + (today.getMonth() + 1) + '/' + today.getDate());
+        if(todayZero > new Date(timeStep.start)  && todayZero < new Date(timeStep.end)){
+            timelineDiv.find('.timelineT')   //今天
+                 .css(
+                     {
+                          'left': (todayZero.getTime()-timeStep.start)*100/timeStep.total+'%',
+                          'display':'block'
+                     }
+                 )
+                 .children('.timePoint').html(format.date(todayZero).date);
+
+            scroll();
+
+
+        }else{
+            timelineDiv.find('.timelineT').hide();
+        }
+
+
+        timelineDiv.find('.timelineS')   //开始
+                .children('.timePoint').html(format.date(new Date(timeStep.start)).date);
+
+        timelineDiv.find('.timelineE')   //结束
+                .children('.timePoint').html(format.date(new Date(timeStep.end)).date);
+
+        /*时间轴数据*/
+        var baseHigh = 45,addH = 40,baseLeft = 20;
+        var evenGroup = [],oddGroup = [],titleContent = '';
+        var hasEnd = [];
+        for(var i=0;i<arr.length;i++){
+
+            var even = true;
+            if(i%2){even = false;/*奇数*/}
+
+            var obj = arr[i];
+            var time = format.date(new Date(obj.time)).date;
+            var showTime = time.split('-').join('.').substr(5);
+
+            /*  声明html  */
+            var divNode = $('<div class="dateNode"></div>');
+            var circle = $('<div class="circle"></div>');
+            var line = $('<div class="line"></div>');
+            var title = $('<div class="title" data-num="'+obj.id+'"></div>');
+
+
+            /*  线的颜色  */
+            var lineBk = {
+                0:{0:'#B81D27', 1:'#396'},            //event
+                1:{0:'#3278B3', 1:'#3278B3', 2:'#FFC755'},//scheduleEnd
+                2:{0:'#3278B3', 1:'#3278B3',2:'#FFC755'}  //scheduleStart
+            };
+            line.css({'background':lineBk[obj.arrType][obj.status]});
+
+
+            /*  相关节点定位 */
+            var left = (new Date(obj.time).getTime()-timeStep.start)*100/timeStep.total+'%';
+            divNode.css({'left':left});
+            if(!even){
+                title.css({'bottom':(baseHigh+25)*(-1)});
+                line.css({'bottom':baseHigh*(-1)/*,'background':'#fbbc05'*/});
+            }
+
+
+            /*  title  mouse/click事件  */
+
+            var plateList = {
+                order:i,
+                data:{
+                    status:obj.status,
+                    firm:obj['company'].name,
+                    firmId:obj['company'].id,
+                    firmUrl:'/timeline/index.html',
+                    id:obj.id,
+                    type:obj.type,
+//                  types:obj.type
+                }
+            };
+
+
+            if(obj.arrType == 0){          // event obj.arrType == 0
+                titleContent = obj.title;
+            }else if(obj.arrType == 1){    // scheduleEnd obj.arrType == 1
+
+                plateList['data'].types = ScheType[obj.type]+'结束';
+                titleContent = obj['company'].name+'第'+obj.title+'次'+plateList['data'].types;
+
+            }else{                         // scheduleStart obj.arrType == 2
+                if(!obj.isEnd){//不是结束
+
+                    plateList['data'].types = ScheType[obj.type]+'开始';
+                    titleContent = obj['company'].name+'第'+obj.title+'次'+plateList['data'].types;
+                    hasEnd.push(title[0]);
+
+                }else{//是结束 对应的结束关系
+
+                    plateList['data'].types = ScheType[obj.type]+'结束';
+                    titleContent = obj['company'].name+'第'+obj.title+'次'+plateList['data'].types;
+                    for(var k =0;k<hasEnd.length;k++){
+                        if($(hasEnd[k]).attr('data-num') == title.attr('data-num')){
+                            hasEnd[k].connect = title[0];
+                            title[0].connect = hasEnd[k];
+                        }
+                    }
+
+                }
+
+            }
+            title.on({
+                mouseover:function(){
+                    $(this.connect).css({
+                        'font-weight':'bold'
+                    });
+                    $(this).css({
+                        'font-weight':'bold'
+                    });
+                },
+                mouseout:function(){
+                    $(this.connect).css({
+                        'font-weight':'normal'
+                    });
+                    $(this).css({
+                        'font-weight':'normal'
+                    });
+                }
+            });
+            title.attr('title',titleContent).html(showTime+titleContent);
+
+
+            if(obj.arrType == 0){ //event
+                plateList['data'].linkUrl = '/events/detail.html';
+                plateList['data'].isEvent = true;
+            }else{                //schedule
+                plateList['data'].linkUrl = '/plan/detail.html';
+                plateList['data'].isEvent = false;
+            }
+
+            title[0].list = plateList;
+            title[0].onclick = function(e){
+                e.stopPropagation();//阻止body事件
+                createPlate(this);
+            };
+
+
+            $(divNode).append(circle).append(line).append(title);
+            $('#nodes').append(divNode);
+
+            /*  时间轴定位  */
+            var titleNode = '',lineNode = '', distance = 0,safeLength = 0,Bottom = 0, Height = 0;
+            var currentLeft = divNode[0].offsetLeft;//当前的
+            if(even){ // title bottom+30  line height+30
+                if(evenGroup.length == 0){
+                    evenGroup.push(divNode[0]);
+                }else{
+                    for(var e=0;e<evenGroup.length;e++){
+                        var single = evenGroup[e];
+                        var evenLeft = single.offsetLeft;
+                        lineNode = $(single).find('.line');
+                        titleNode = $(single).find('.title');
+                        distance = currentLeft - evenLeft;
+                        safeLength = titleNode.width() + baseLeft;
+                        if(distance > safeLength){//有安全距离   // title bottom+30   line height+30
+                            evenGroup[e] = divNode[0];//替换第n个
+                            break;
+
+                        }else{
+                            Bottom = parseInt(titleNode.css('bottom'));
+                            Height = lineNode.height();
+
+                            title.css({'bottom':Height+addH});
+                            line.height(Bottom+addH);
+                            if((e+1) == evenGroup.length){
+                                evenGroup.push(divNode[0]);
+                                break;
+                            }
+
+                        }
+                    }
+
+                }
+            }else{
+
+                if(oddGroup.length == 0){
+                    oddGroup.push(divNode[0]);
+                }else{
+
+                    for(var o=0;o<oddGroup.length;o++){
+                        var oddSingle = oddGroup[o];
+                        var oddLeft = oddSingle.offsetLeft;
+                        lineNode = $(oddSingle).find('.line');
+                        titleNode = $(oddSingle).find('.title');
+                        distance = currentLeft - oddLeft;
+                        safeLength = titleNode.width() + baseLeft;
+                        if(distance > safeLength){//有安全距离   // title bottom+30   line height+30
+                            oddGroup[o] = divNode[0];//替换第n个
+                            break;
+
+                        }else{
+                            Bottom = parseInt(titleNode.css('bottom'));
+                            Height = lineNode.height();
+
+                            title.css({'bottom':Bottom-addH});
+                            line.css({'bottom':(Height+addH)*(-1)});
+                            line.height(Height+addH);
+                            if((o+1) == oddGroup.length){
+                                oddGroup.push(divNode[0]);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+          var top1 = $(evenGroup[evenGroup.length-1]).find('.title').css('bottom');
+          var top2 = $(oddGroup[oddGroup.length-1]).find('.title').css('bottom');
+
+          var HEIGHT = parseInt(top1)-parseInt(top2);
+          var length = Math.abs(evenGroup.length - oddGroup.length);
+          if(HEIGHT > 600){
+              $('#timeline').css({
+                  'min-height':HEIGHT+(length+2)*40
+              });
+          }
+          
+    },
+  };
+
+
+  /*初始化*/
+  /*var todayNext = new Date();
+  todayNext.setTime(todayNext.getTime() + 7 * 24 * 3600 * 1000);//后7天
+  todayNext = new Date(todayNext.getFullYear() + "/" + (todayNext.getMonth() + 1) + '/' + todayNext.getDate());
+  var todayPre = new Date();
+  todayPre.setTime(todayPre.getTime() - 7 * 24 * 3600 * 1000);//前7天
+  todayPre = new Date(todayPre.getFullYear() + "/" + (todayPre.getMonth() + 1) + '/' + todayPre.getDate());
+
+  timline.init(todayPre,todayNext);*/
+
+  /*筛选*/
+  $('#select').click(function(){
+      var Time1 = new Date($('#startTime').val().split('-').join('/'));
+      var Time2 = new Date($('#endTime').val().split('-').join('/'));
+      timline.init(Time1,Time2);
+  });
+
+  $('#selectType')[0].onchange = function(){
+
+      var value = $(this).val();
+
+       timline.select(value);
+  };
+
+  var a = new Date("2017-07-03".split('-').join('/'));
+  var b = new Date("2018-02-07".split('-').join('/'));
+  timline.init(a,b);
+
+  $('#bkToday').click(function () {
+      scroll();
+  });
+
+  $(document.body).click(function(){
+      var plate = $('#plate');
+      if(plate.hasClass('showPlate')){
+          plate.removeClass('showPlate')
+      }
+  });
+
+  /********  创建面板  *********/
+  function createPlate(self)  {
+
+      var order = self['list'].order,
+          data = self['list'].data;
+
+      var EventStatus = {0:'未执行', 1:'已执行',2:'已取消'};
+      var EventType = {0:'项目启动', 1:'项目启动会', 2:'项目服务', 3:'项目回访', 4:'项目验收'};
+      var ScheType = {0:'专家检测', 1:'被动扫描'};
+
+      if($('#plate').length<=0){
+          var div = $('<div id="plate" class="plate showPlate"></div>');
+          var firmDiv = $('<div class="plate_firm"></div>');
+          var statusDiv = $('<div class="plate_status"></div>');
+          var typeDiv = $('<div class="plate_type"></div>');
+          var linkDiv = $('<div class="plate_link"></div>');
+          firmDiv.append(
+               '<span>公司：</span>'+
+               '<a id="firmLink" href="'+data.firmUrl+'?id='+data.firmId+'">'+data.firm+'</a>'
+          );
+          statusDiv.append(
+               '<span>事件状态：</span>'+
+               '<span  id="eventStatus">'+EventStatus[data.status]+'</span>'
+          );
+
+
+          var span = $('<span id="Types"></span>');
+          if(data.isEvent){
+              span.append(EventType[data.type]);
+          }else{
+              span.append(ScheType[data.type]);
+          }
+
+          typeDiv.append('<span>事件类型：</span>');
+          typeDiv.append(span);
+
+          linkDiv.append(
+              '<a id="detailLink" target="_blank" href="'+data.linkUrl+'?id='+data.id+'">点击查看详情</a>'
+          );
+
+          div[0].num = order;
+          div.append(firmDiv)
+             .append(statusDiv)
+             .append(typeDiv)
+             .append(linkDiv);
+          $('#nodes').append(div);
+
+      }
+
+      else
+      {
+
+          var plate = $('#plate');
+
+          if(plate[0].num == order){
+               plate.toggleClass('showPlate');
+          }else{
+
+              $('#firmLink').attr('href',data.firmUrl+'?id='+data.firmId)
+                            .html(data.firm);
+              $('#eventStatus').html(EventStatus[data.status]);
+
+              if(data.isEvent){
+                  $('#Types').html(EventType[data.type]);
+
+              }else{
+                  $('#Types').html(ScheType[data.type]);
+              }
+
+              $('#detailLink').attr('href',data.linkUrl+'?id='+data.id);
+
+              plate.addClass('showPlate');
+              plate[0].num = order;
+          }
+      }
+
+      var Plate = $('#plate');
+
+      var left = parseInt($(self).parent().css('left'))+$(self).width()-15;/*title的left*/
+
+      var bottom = parseInt($(self).css('bottom'));
+
+      var swBody = $('#swBody').width();
+      var Interval = (swBody-$('#timeline').width())/2;
+      if((left+Plate.width()+Interval) >  swBody){//越界
+          left = parseInt($(self).parent().css('left')) - Plate.width()-45;
+      }
+
+      Plate.css({'left':left, 'top':bottom*(-1)});
+  }
+
+  function scroll(){
+      var swInner = $('#swInner');
+      var deifferVal = parseInt(swInner.find('.timelineT').css('left')) - swInner.width();
+      var sLeft = deifferVal + swInner.width()/2+30;
+      swInner[0].scrollLeft = sLeft;
+  }
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+body{font-size: 12px;background: #fff;}
+input{border-radius:0;}
+.main-container{background: #fff;}
+
+.top-nav .nav-header{width:245px;}
+.top-nav .nav-container {
+  margin-left:300px;
+}
+
+.top-show .brand{height: 54px;line-height: 54px;display: block;}
+.top-nav  .brand{color: #fff;}
+.top-nav  .logoBug{padding:0 7px;font-size:18px;}
+.top-nav  .brand span{position: relative;top: 3px;}
+.top-nav .logoFlat{padding-left:7px;font-size: 12px;}
+
+@media (max-width: 991px) {
+  .top-nav .top-show{
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    width:100%;
+    height:100%;
+    background-image:url('/images/saas_bk.png');
+    z-index:9999;
+    padding-left:15px;
+  }
+  .spread{  display: none;}
+
+}
+@media (min-width:991px) and (max-width:2000px){
+  .top-nav .top-show{
+    display: none;
+  }
+}
+#userHover a{padding:5px 15px;}/*登录退出*/
+
+.top-nav .user-block .user-panel ul li a:focus{-webkit-transition: none;}
+.top-nav .user-block .user-panel ul li a{-webkit-transition: none;padding:0;}/*所有a*/
+#warnBell .tab-content a{color:#333;display: inline-block;width:100%;height: 100%;}
+#warnBell .nav-tabs a,#tabContent .listMore a{padding:6px 0;text-align:center;margin:0;}/*查看更多 公告/消息*/
+#warnBell .nav-tabs a:hover{background: #fff;}
+
+#tabContent{    border: 1px solid #ddd;  border-bottom: none;}
+#tabContent .list-group{height:292px;}
+#tabContent li a>div>span:first-child{font-weight: 600;width: 108px;}/*一云*/
+#tabContent li a>span,#tabContent li a>div>span:first-child{overflow: hidden;white-space:nowrap;text-overflow: ellipsis;}
+#tabContent li a>span{width: 208px;}/*一云content*/
+
+#tabContent .alreadyRead a{color:#d5d5d5;}
+.list-group-item div{margin-bottom:5px;}
+.list-group-item{border:0;border-bottom:1px solid #ddd;margin:0;}
+.list-group-item.listMore{border-top:1px solid #ddd;}
+.list-group-item:last-child{border-radius: 0;}
+.list-group-item:first-child{border-radius: 0;}
+.top-nav .user-block .user-panel ul li a:hover{background:none;}
+.list-group-item:hover{background:#f5f5f5;}
+#warnBell .tab-content{min-width:240px;}
+
+.listMore{background:#f5f5f5;padding:0;}
+/*没有消息*/
+.msgBlank{height:295px;line-height:325px;text-align:center;border-bottom: none;}
+
+.sidebar-menu .main-menu ul li.openColor > a {font-weight: 700;color:#0E83E9 }
+.sidebar-menu .main-menu ul li.openColor > a .menu-icon{color:#0E83E9;}
+
+.sidebar-menu .main-menu ul li a{font-size: 12px;}
+.smart-widget .smart-widget-header{font-weight: bold;font-size: 14px;}
+.top-nav .user-block .user-panel{right: 0;border-radius: 0px;top:54px; }
+.top-nav .user-block .user-panel{right: 0;border-radius: 0px;top:54px; }
+#userToggle{
+  display: inline-block;
+  height:46px;padding:4px 10px 5px 10px;
+  border-left: 1px solid #2a4777;
+  border-right: 1px solid #2a4777;
+  margin:4px 0;
+}
+#headerSpread{
+  height:42px;
+  background: #fff;
+  position: fixed;
+  top:54px;
+  left:0;right:0;z-index:999;
+  border-bottom: 1px solid #ddd;
+}
+.spreadLeft{margin:0;float:left;padding:12px 0;background: #f5f5f5;width:179px;}
+.spreadLeft span{float:left;margin:0;padding-left:47px;color:#787a7d;position: relative;top:2px;}
+.spreadLeft i{cursor:pointer;float:right;padding: 0 10px;margin-right: 12px;}
+.spreadLeft .leftHidden{display:none;}
+
+.spreadList{float:left;margin-bottom:0;padding-left:20px;border-left: 1px solid #ddd;}
+.spreadList li{float:left;list-style: none;height:42px;line-height:42px;}
+.spreadList i{padding:0 5px;}
+
+.main-container{margin-top: 42px;padding: 20px;}
+.short{width:40px;}
+.top-header{background-image:url('/images/saas_bk.png')}
+
+.sidebar-menu{border-right: 1px solid #ddd;/*border-top: 1px solid #ddd;*/}
+@media (min-width:992px){
+  .sidebar-menu.sidebar-mini{border-right:1px solid #ddd;}
+}
+
+/*分页器*/
+.pagers{margin-top:30px;}
+.pagers:after{content: '';display:block;clear: both;}
+.pageCount{ float: right }
+.pageCount span{
+  border: 1px solid #ccc;
+  padding:5px 10px;
+  font-style: normal;
+  color: #989ea6;
+  cursor: pointer;
+  font-weight: bold;
+  margin-right:5px;
+}
+
+.pageCount span.active{  background: #0E83E9;color: #fff;  }
+.pageCount span:hover{  background: #0E83E9;color: #fff;  }
+.pageCount .pagerInput{width: 45px;height:26px;border: 1px solid #ccc;margin:0 5px;border-radius: 0;}
+.pageCount .btn{border-radius: 0;margin-left:5px;padding: 3px 10px;margin-top: -2px;}
+.pageCounts {color:#989ea6; float: left;}
+
+
+/*提示框修改*/
+.modal-header{ border-bottom: 1px solid #e5e5e5 }
+.editModal .modal-body {text-align: center;padding: 30px}
+.modal-body img{vertical-align: text-bottom;padding-right: 5px}
+.editModal .modal-footer {text-align: center;background-color: #F2F2F5;padding: 10px;border-top: 0px;text-align: right}
+.editModal .modal-footer button{border-radius: 0px}
+.editModal .modal-dialog .modal-content{border-radius: 0px}
+/*loading等待 */
+.editModal .modal-body p{margin: 11px 0px}
+
+/*模态框的公共样式*/
+#exampleModal label,#myModalPsd label,#myModal label,#myModalEdit label{font-size: 12px;font-weight: 500}
+#myModalPsd .modal-dialog .modal-content{border-radius: 0px}
+#myModalPsd .modal-footer button{border-radius: 0px}
+#myModal .modal-dialog .modal-content{border-radius: 0px}
+#myModal .modal-footer button{border-radius: 0px}
+#exampleModal .modal-dialog .modal-content{border-radius: 0px}
+#exampleModal  .modal-footer button{border-radius: 0px}
+#editIPModal .modal-dialog .modal-content{border-radius: 0px}
+#editIPModal .modal-footer button{border-radius: 0px}
+#myModalEdit .modal-dialog .modal-content{border-radius: 0px}
+#myModalEdit  .modal-footer button{border-radius: 0px}
+
+
+#startToken .modal-dialog .modal-content{border-radius: 0px}
+#startToken  .modal-footer button{border-radius: 0px}
+
+
+#ResetModal .modal-dialog .modal-content{border-radius: 0px}
+#ResetModal  .modal-footer button{border-radius: 0px}
+
+#CloseModal .modal-dialog .modal-content{border-radius: 0px}
+#CloseModal  .modal-footer button{border-radius: 0px}
+
+#createList .modal-dialog .modal-content{border-radius: 0px}
+#createList  .modal-footer button{border-radius: 0px}
+
+#editList .modal-dialog .modal-content{border-radius: 0px}
+#editList  .modal-footer button{border-radius: 0px}
+
+
+#CloseModal label,#ResetModal label,#startToken label{font-size: 12px;font-weight: 500}
+.smart-widget .smart-widget-header .activeColor{font-weight: 500;}
+#editIPModal .control-label{font-weight: 500;font-size: 12px;}
+
+
+
+
+
+/*ip黑名单*/
+.block_header_right{float: right;margin-top: 1px}
+.smart-widget .block_header_right span{text-align: center;height: 24px;cursor: pointer;background-color:#0E83E9;padding: 5px 10px;color: white;}
+
+/*暂无数据*/
+.no-data{color: #aaa!important;font-weight: normal!important;}
+.table-hover>tbody>tr.nodataTr:hover{background-color: transparent;}
+/*loading*/
+.load-container{
+  height: 40px;
+  margin: 10px auto;
+  width: 30px;
+}
+.load-container .loader{
+  position: relative;
+  font-size: 11px;
+  margin: 5px 10px;
+  width: 30px;
+  height: 30px;
+  box-shadow: inset 0 0 0 2.5px #226dd4;
+  border-radius: 50%;
+  float: left;
+}
+.load-container .loader .left-transparent{
+  position: absolute;
+  width: 15px;
+  height: 30px;
+  background-color: #fff;
+  transform-origin: 100% 50%;
+  animation: spin 2s infinite ease 1.5s;
+}
+.load-container .loader .right-transparent{
+  position: absolute;
+  left: 15px;
+  width: 15px;
+  height: 30px;
+  background-color: #fff;
+  transform-origin: 0% 50%;
+  animation: spin 2s infinite ease;
+}
+@keyframes spin {
+  from {transform: rotate(0deg) }
+  to  {transform: rotate(360deg)}
+}
+
+.table-hover>tbody>tr.loading:hover{
+  background-color:transparent;
+}
+.edit,.delete{color:#337ab7;cursor:pointer;}
+.edit{margin-right:5px;}
+
+/*footer*/
+.footer{color: #666;  position: fixed;  bottom: 0;  right: 0;  left:0;  margin-left: 170px;display: none}
+.footer-left{font-size: 18px;margin:0  15px 0 15px; }
+.footer-right{font-size: 14px; }
+
+.cursor{cursor: pointer;color:#0E83E9!important;margin-right: 5px;}
+/*不可以、禁用*/
+.lightColor{color: #aaa;}
+/*统一表格*/
+.operateBoth{width: 100px;}/*4、5个字*/
+.operateOne{width: 50px;}/*2个字*/
+.createTime{width: 140px;}/*创建时间*/
+.middleWidth{width: 110px;}/*ip 内网，外网*/
+.domainWidth{width: 180px;}/*域名*/
+.emailWidth{width: 150px;}/*邮箱*/
+.spreadWidth{/*自由缩放的*/
+  max-width:100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  }
+.gray{color: #d5d5d5}
+.icon{color: red;font-size: 14px;line-height: 16px}
+
+
+
